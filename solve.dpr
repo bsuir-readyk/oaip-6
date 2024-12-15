@@ -88,7 +88,7 @@ var
   foundNewClique: boolean;
 begin
   // Если соседей меньше 2 => максимальная клика - текущая
-  if ((neighborCount = 1) or (neighborCount = 0)) then
+  if (neighborCount < 2) then
   begin
     FindMaxClique := currentClique;
   end
@@ -115,7 +115,7 @@ begin
 
       while (nextNeighborIndex <= neighborCount) do
       begin
-        if (graph[neighbors[currentNeighborIndex], neighbors[nextNeighborIndex]] = 1) then
+        if (graph[neighbors[currentNeighborIndex]][neighbors[nextNeighborIndex]] = 1) then
         begin
           newNeighbors[newNeighborCount] := neighbors[nextNeighborIndex];
           Inc(newNeighborCount);
@@ -185,7 +185,7 @@ begin
     // обновить соседей
     while (j <= N) do
     begin
-      if (GRAPH[i, j] = 1) then
+      if (GRAPH[i][j] = 1) then
       begin
         neighbors[k] := j;
         Inc(k);
