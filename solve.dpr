@@ -73,72 +73,88 @@ var GRAPH: TGraphMatrix =
   (0, 0, 0, 1, 1, 0)
 );
 
-function FindMaxClick(
-  GRAPH: TGraphMatrix;
-  k, x: integer;
+
+function FindMaxClique(
+  graph: TGraphMatrix;
+  neighborCount: integer;
+  cliquePosition: integer;
   var currentMaxCliqueSize: integer;
   neighbors: TArr;
-  var maxCL, curCl: TArr
+  var maximalClique, currentClique: TArr
 ): TArr;
 var
-  i, j, p, l: integer;
+  currentNeighborIndex, nextNeighborIndex, newNeighborCount, copyIndex: integer;
   newNeighbors: TArr;
-  b: boolean;
+  foundNewClique: boolean;
 begin
-  if ((k = 1) or (k = 0)) then
+  if ((neighborCount = 1) or (neighborCount = 0)) then
   begin
-    FindMaxClick := curCL;
+    FindMaxClique := currentClique;
   end
   else
   begin
-    i := 1;
-    b := false;
-    while (i < k) do
+    currentNeighborIndex := 1;
+    foundNewClique := false;
+    
+    while (currentNeighborIndex < neighborCount) do
     begin
-      if (i > 1) then
+      if (currentNeighborIndex > 1) then
       begin
-        if (b) then
+        if (foundNewClique) then
         begin
-          Dec(x);
-          b := false;
+          Dec(cliquePosition);
+          foundNewClique := false;
         end;
-        curCl[x-1] := neighbors[i];
+        currentClique[cliquePosition-1] := neighbors[currentNeighborIndex];
       end;
 
-      j := i + 1;
-      p := 1;
+      // Find mutual neighbors
+      nextNeighborIndex := currentNeighborIndex + 1;
+      newNeighborCount := 1;
 
-      while (j <= k) do
+      while (nextNeighborIndex <= neighborCount) do
       begin
-        if (GRAPH[neighbors[i], neighbors[j]] = 1) then
+        if (graph[neighbors[currentNeighborIndex], 
+                 neighbors[nextNeighborIndex]] = 1) then
         begin
-          newNeighbors[p] := neighbors[j];
-          Inc(p);
+          newNeighbors[newNeighborCount] := neighbors[nextNeighborIndex];
+          Inc(newNeighborCount);
         end;
-        Inc(j);
+        Inc(nextNeighborIndex);
       end;
 
-      if (p <> 1) then
+      // If mutual neighbors found, extend clique
+      if (newNeighborCount > 1) then
       begin
-        b := True;
-        curCl[x] := newNeighbors[1];
-        Inc(x);
-        curCl := FindMaxClick(GRAPH, p-1, x, currentMaxCliqueSize, newNeighbors, maxCl, curCl);
+        foundNewClique := True;
+        currentClique[cliquePosition] := newNeighbors[1];
+        Inc(cliquePosition);
+        
+        currentClique := FindMaxClique(
+          graph, 
+          newNeighborCount-1, 
+          cliquePosition,
+          currentMaxCliqueSize,
+          newNeighbors,
+          maximalClique,
+          currentClique
+        );
       end;
 
-      if (currentMaxCliqueSize < x-1) then
+      // Update maximal clique if current is larger
+      if (currentMaxCliqueSize < cliquePosition-1) then
       begin
-        currentMaxCliqueSize := x-1;
-        l := 1;
-        while (l <= currentMaxCliqueSize) do
+        currentMaxCliqueSize := cliquePosition-1;
+        copyIndex := 1;
+        while (copyIndex <= currentMaxCliqueSize) do
         begin
-          maxCl[l] := curCl[l];
-          Inc(l);
+          maximalClique[copyIndex] := currentClique[copyIndex];
+          Inc(copyIndex);
         end;
       end;
-      Inc(i);
+      Inc(currentNeighborIndex);
     end;
-    FindMaxClick := maxCl;
+    FindMaxClique := maximalClique;
   end;
 end;
 
@@ -189,7 +205,7 @@ begin
       x := 3;
       maxClNew := curCl;
 
-      maxClNew := FindMaxClick(GRAPH, k-1, x, currentMaxCliqueSize, neighbors, maxClNew, curCl);
+      maxClNew := FindMaxClique(GRAPH, k-1, x, currentMaxCliqueSize, neighbors, maxClNew, curCl);
 
       if (globalMaxCliqueSize < currentMaxCliqueSize) then
       begin
@@ -252,3 +268,4 @@ begin
     end;
   end;
 end.
+
