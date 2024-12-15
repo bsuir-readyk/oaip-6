@@ -83,10 +83,11 @@ function FindMaxClique(
   var maximalClique, currentClique: TArr
 ): TArr;
 var
-  currentNeighborIndex, nextNeighborIndex, newNeighborCount, copyIndex: integer;
+  currentNeighborIndex, nextNeighborIndex, newNeighborCount: integer;
   newNeighbors: TArr;
   foundNewClique: boolean;
 begin
+  // Если соседей меньше 2 => максимальная клика - текущая
   if ((neighborCount = 1) or (neighborCount = 0)) then
   begin
     FindMaxClique := currentClique;
@@ -108,14 +109,13 @@ begin
         currentClique[cliquePosition-1] := neighbors[currentNeighborIndex];
       end;
 
-      // Find mutual neighbors
+      // обновить соседей
       nextNeighborIndex := currentNeighborIndex + 1;
       newNeighborCount := 1;
 
       while (nextNeighborIndex <= neighborCount) do
       begin
-        if (graph[neighbors[currentNeighborIndex], 
-                 neighbors[nextNeighborIndex]] = 1) then
+        if (graph[neighbors[currentNeighborIndex], neighbors[nextNeighborIndex]] = 1) then
         begin
           newNeighbors[newNeighborCount] := neighbors[nextNeighborIndex];
           Inc(newNeighborCount);
@@ -123,7 +123,6 @@ begin
         Inc(nextNeighborIndex);
       end;
 
-      // If mutual neighbors found, extend clique
       if (newNeighborCount > 1) then
       begin
         foundNewClique := True;
@@ -141,16 +140,10 @@ begin
         );
       end;
 
-      // Update maximal clique if current is larger
       if (currentMaxCliqueSize < cliquePosition-1) then
       begin
         currentMaxCliqueSize := cliquePosition-1;
-        copyIndex := 1;
-        while (copyIndex <= currentMaxCliqueSize) do
-        begin
-          maximalClique[copyIndex] := currentClique[copyIndex];
-          Inc(copyIndex);
-        end;
+        maximalClique := currentClique;
       end;
       Inc(currentNeighborIndex);
     end;
@@ -170,6 +163,7 @@ begin
 
   while (i < N) do
   begin
+    // сбросить значения до начальных
     l := 1;
     while (l <= N) do
     begin
@@ -188,6 +182,7 @@ begin
     j := i + 1;
     k := 1;
 
+    // обновить соседей
     while (j <= N) do
     begin
       if (GRAPH[i, j] = 1) then
@@ -198,6 +193,7 @@ begin
       Inc(j);
     end;
 
+    // если есть соседи запустить алгоритм поиска максимальной клики
     if (neighbors[1] <> 0) then
     begin
       curCl[2] := neighbors[1];
@@ -207,6 +203,7 @@ begin
 
       maxClNew := FindMaxClique(GRAPH, k-1, x, currentMaxCliqueSize, neighbors, maxClNew, curCl);
 
+      // если новая клика больше максимальной - обновить максимальную
       if (globalMaxCliqueSize < currentMaxCliqueSize) then
       begin
         globalMaxCliqueSize := currentMaxCliqueSize;
@@ -215,6 +212,7 @@ begin
       end
       else
       begin
+        // если новая клика равна максимальной - обновить список максимальных
         if ((globalMaxCliqueSize = currentMaxCliqueSize) and (i <> 1)) then
         begin
           l := numMaxCl + 1;
@@ -230,6 +228,8 @@ begin
     Inc(i);
   end;
 
+  // вывести максимальную клику
+  // если макс клика размера 1 => вывести все вершины
   if (globalMaxCliqueSize = 1) then
   begin
     l := 1;
@@ -241,6 +241,7 @@ begin
   end
   else
   begin
+    // Если найдено несколько максимальных клик
     if (globalMaxCliqueSize < numMaxCl) then
     begin
       j := numMaxCl div globalMaxCliqueSize;
@@ -258,6 +259,7 @@ begin
       end;
     end
     else
+    // Если одна
     begin
       l := 1;
       while (l <= globalMaxCliqueSize) do
