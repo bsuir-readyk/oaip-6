@@ -73,10 +73,16 @@ var GRAPH: TGraphMatrix =
   (0, 0, 0, 1, 1, 0)
 );
 
-function FindMaxClick(GRAPH: TGraphMatrix; k, x: integer; var maxVer: integer; curVers: TArr; var maxCL, curCl: TArr): TArr;
+function FindMaxClick(
+  GRAPH: TGraphMatrix;
+  k, x: integer;
+  var currentMaxCliqueSize: integer;
+  neighbors: TArr;
+  var maxCL, curCl: TArr
+): TArr;
 var
   i, j, p, l: integer;
-  curVers2: TArr;
+  newNeighbors: TArr;
   b: boolean;
 begin
   if ((k = 1) or (k = 0)) then
@@ -96,7 +102,7 @@ begin
           Dec(x);
           b := false;
         end;
-        curCl[x-1] := curVers[i];
+        curCl[x-1] := neighbors[i];
       end;
 
       j := i + 1;
@@ -104,9 +110,9 @@ begin
 
       while (j <= k) do
       begin
-        if (GRAPH[curVers[i], curVers[j]] = 1) then
+        if (GRAPH[neighbors[i], neighbors[j]] = 1) then
         begin
-          curVers2[p] := curVers[j];
+          newNeighbors[p] := neighbors[j];
           Inc(p);
         end;
         Inc(j);
@@ -115,16 +121,16 @@ begin
       if (p <> 1) then
       begin
         b := True;
-        curCl[x] := curVers2[1];
+        curCl[x] := newNeighbors[1];
         Inc(x);
-        curCl := FindMaxClick(GRAPH, p-1, x, maxVer, curVers2, maxCl, curCl);
+        curCl := FindMaxClick(GRAPH, p-1, x, currentMaxCliqueSize, newNeighbors, maxCl, curCl);
       end;
 
-      if (maxVer < x-1) then
+      if (currentMaxCliqueSize < x-1) then
       begin
-        maxVer := x-1;
+        currentMaxCliqueSize := x-1;
         l := 1;
-        while (l <= maxVer) do
+        while (l <= currentMaxCliqueSize) do
         begin
           maxCl[l] := curCl[l];
           Inc(l);
@@ -138,11 +144,11 @@ end;
 
 var
   i, j, k, x, l, h: integer;
-  maxVer, maxVerRemember, numMaxCl: integer;
-  curCl, maxCl, curVers, maxClNew: TArr;
+  currentMaxCliqueSize, globalMaxCliqueSize, numMaxCl: integer;
+  curCl, maxCl, neighbors, maxClNew: TArr;
 begin
   i := 1;
-  maxVerRemember := 1;
+  globalMaxCliqueSize := 1;
   maxCl[1] := 1;
   numMaxCl := 0;
 
@@ -151,7 +157,7 @@ begin
     l := 1;
     while (l <= N) do
     begin
-      curVers[l] := 0;
+      neighbors[l] := 0;
       Inc(l);
     end;
 
@@ -170,45 +176,45 @@ begin
     begin
       if (GRAPH[i, j] = 1) then
       begin
-        curVers[k] := j;
+        neighbors[k] := j;
         Inc(k);
       end;
       Inc(j);
     end;
 
-    if (curVers[1] <> 0) then
+    if (neighbors[1] <> 0) then
     begin
-      curCl[2] := curVers[1];
-      maxVer := 2;
+      curCl[2] := neighbors[1];
+      currentMaxCliqueSize := 2;
       x := 3;
       maxClNew := curCl;
 
-      maxClNew := FindMaxClick(GRAPH, k-1, x, maxVer, curVers, maxClNew, curCl);
+      maxClNew := FindMaxClick(GRAPH, k-1, x, currentMaxCliqueSize, neighbors, maxClNew, curCl);
 
-      if (maxVerRemember < maxVer) then
+      if (globalMaxCliqueSize < currentMaxCliqueSize) then
       begin
-        maxVerRemember := maxVer;
-        numMaxCl := maxVerRemember;
+        globalMaxCliqueSize := currentMaxCliqueSize;
+        numMaxCl := globalMaxCliqueSize;
         maxCl := maxClNew;
       end
       else
       begin
-        if ((maxVerRemember = maxVer) and (i <> 1)) then
+        if ((globalMaxCliqueSize = currentMaxCliqueSize) and (i <> 1)) then
         begin
           l := numMaxCl + 1;
-          while (l <= numMaxCl + maxVerRemember) do
+          while (l <= numMaxCl + globalMaxCliqueSize) do
           begin
             maxCl[l] := maxClNew[l - numMaxCl];
             Inc(l);
           end;
-          numMaxCl := numMaxCl + maxVerRemember;
+          numMaxCl := numMaxCl + globalMaxCliqueSize;
         end;
       end;
     end;
     Inc(i);
   end;
 
-  if (maxVerRemember = 1) then
+  if (globalMaxCliqueSize = 1) then
   begin
     l := 1;
     while (l <= N) do
@@ -219,14 +225,14 @@ begin
   end
   else
   begin
-    if (maxVerRemember < numMaxCl) then
+    if (globalMaxCliqueSize < numMaxCl) then
     begin
-      j := numMaxCl div maxVerRemember;
+      j := numMaxCl div globalMaxCliqueSize;
       h := 0;
       while (h < j) do
       begin
-        l := h * maxVerRemember + 1;
-        while (l <= maxVerRemember * h + maxVerRemember) do
+        l := h * globalMaxCliqueSize + 1;
+        while (l <= globalMaxCliqueSize * h + globalMaxCliqueSize) do
         begin
           write(maxCl[l]);
           Inc(l);
@@ -238,7 +244,7 @@ begin
     else
     begin
       l := 1;
-      while (l <= maxVerRemember) do
+      while (l <= globalMaxCliqueSize) do
       begin
         write(maxCl[l]);
         Inc(l);
@@ -246,4 +252,3 @@ begin
     end;
   end;
 end.
-
