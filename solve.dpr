@@ -73,8 +73,6 @@ var GRAPH: TGraphMatrix =
   (0, 0, 0, 1, 1, 0)
 );
 
-
-// Функция нахождения максимальной клики
 function FindMaxClick(GRAPH: TGraphMatrix; k, x: integer; var maxVer: integer; curVers: TArr; var maxCL, curCl: TArr): TArr;
 var
   i, j, p, l: integer;
@@ -82,7 +80,9 @@ var
   b: boolean;
 begin
   if ((k = 1) or (k = 0)) then
-    FindMaxClick := curCL
+  begin
+    FindMaxClick := curCL;
+  end
   else
   begin
     i := 1;
@@ -93,36 +93,44 @@ begin
       begin
         if (b) then
         begin
-          x := x-1;
+          Dec(x);
           b := false;
         end;
         curCl[x-1] := curVers[i];
       end;
+
       j := i + 1;
       p := 1;
+
       while (j <= k) do
       begin
         if (GRAPH[curVers[i], curVers[j]] = 1) then
-          begin
-            curVers2[p] := curVers[j];
-            p := p + 1;
-          end;
-        j := j + 1;
+        begin
+          curVers2[p] := curVers[j];
+          Inc(p);
+        end;
+        Inc(j);
       end;
+
       if (p <> 1) then
       begin
         b := True;
         curCl[x] := curVers2[1];
-        x := x + 1;
+        Inc(x);
         curCl := FindMaxClick(GRAPH, p-1, x, maxVer, curVers2, maxCl, curCl);
       end;
+
       if (maxVer < x-1) then
       begin
         maxVer := x-1;
-        for l := 1 to maxVer do
+        l := 1;
+        while (l <= maxVer) do
+        begin
           maxCl[l] := curCl[l];
+          Inc(l);
+        end;
       end;
-      i := i + 1;
+      Inc(i);
     end;
     FindMaxClick := maxCl;
   end;
@@ -137,26 +145,37 @@ begin
   maxVerRemember := 1;
   maxCl[1] := 1;
   numMaxCl := 0;
+
   while (i < N) do
   begin
-    // Онуление прошлых элементов
-    for l := 1 to N do
+    l := 1;
+    while (l <= N) do
+    begin
       curVers[l] := 0;
-    for l := 3 to N do
+      Inc(l);
+    end;
+
+    l := 3;
+    while (l <= N) do
+    begin
       curCl[l] := 0;
+      Inc(l);
+    end;
+
     curCl[1] := i;
     j := i + 1;
     k := 1;
 
-    // Нахождение соседей
-    repeat
+    while (j <= N) do
+    begin
       if (GRAPH[i, j] = 1) then
-        begin
-          curVers[k] := j;
-          k := k + 1;
-        end;
-      j := j + 1;
-    until (j > N);
+      begin
+        curVers[k] := j;
+        Inc(k);
+      end;
+      Inc(j);
+    end;
+
     if (curVers[1] <> 0) then
     begin
       curCl[2] := curVers[1];
@@ -166,40 +185,65 @@ begin
 
       maxClNew := FindMaxClick(GRAPH, k-1, x, maxVer, curVers, maxClNew, curCl);
 
-      // Обновление максимальной клики
       if (maxVerRemember < maxVer) then
       begin
         maxVerRemember := maxVer;
         numMaxCl := maxVerRemember;
         maxCl := maxClNew;
       end
-      else if ((maxVerRemember = maxVer) and (i <> 1)) then
+      else
       begin
-        for l := numMaxCl+1 to numMaxCl + maxVerRemember do
-          maxCl[l] := maxClNew[l - numMaxCl];
-        numMaxCl := numMaxCl + maxVerRemember;
+        if ((maxVerRemember = maxVer) and (i <> 1)) then
+        begin
+          l := numMaxCl + 1;
+          while (l <= numMaxCl + maxVerRemember) do
+          begin
+            maxCl[l] := maxClNew[l - numMaxCl];
+            Inc(l);
+          end;
+          numMaxCl := numMaxCl + maxVerRemember;
+        end;
       end;
     end;
-    i := i + 1;
+    Inc(i);
   end;
 
-  // Вывод максимальной клики
   if (maxVerRemember = 1) then
-    for l := 1 to N do
-    writeln(l)  
-  else if (maxVerRemember < numMaxCl) then
   begin
-    j := numMaxCl div maxVerRemember;
-    for h := 0 to j-1 do
+    l := 1;
+    while (l <= N) do
     begin
-      for l := h * maxVerRemember+1 to maxVerRemember*h + maxVerRemember do
-        write(maxCl[l]);
-      writeln;
+      writeln(l);
+      Inc(l);
     end;
   end
   else
-  for l := 1 to maxVerRemember do
-    write(maxCl[l]);
-  readln;
+  begin
+    if (maxVerRemember < numMaxCl) then
+    begin
+      j := numMaxCl div maxVerRemember;
+      h := 0;
+      while (h < j) do
+      begin
+        l := h * maxVerRemember + 1;
+        while (l <= maxVerRemember * h + maxVerRemember) do
+        begin
+          write(maxCl[l]);
+          Inc(l);
+        end;
+        writeln;
+        Inc(h);
+      end;
+    end
+    else
+    begin
+      l := 1;
+      while (l <= maxVerRemember) do
+      begin
+        write(maxCl[l]);
+        Inc(l);
+      end;
+    end;
+  end;
 end.
 
