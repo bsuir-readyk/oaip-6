@@ -152,7 +152,7 @@ begin
 end;
 
 var
-  i, j, k, x, l, h: integer;
+  i, j, k, l: integer;
   currentMaxCliqueSize, globalMaxCliqueSize, numMaxCl: integer;
   curCl, maxCl, neighbors, maxClNew: TArr;
 begin
@@ -198,10 +198,9 @@ begin
     begin
       curCl[2] := neighbors[1];
       currentMaxCliqueSize := 2;
-      x := 3;
       maxClNew := curCl;
 
-      maxClNew := FindMaxClique(GRAPH, k-1, x, currentMaxCliqueSize, neighbors, maxClNew, curCl);
+      maxClNew := FindMaxClique(GRAPH, k-1, 3, currentMaxCliqueSize, neighbors, maxClNew, curCl);
 
       // если новая клика больше максимальной - обновить максимальную
       if (globalMaxCliqueSize < currentMaxCliqueSize) then
@@ -245,17 +244,17 @@ begin
     if (globalMaxCliqueSize < numMaxCl) then
     begin
       j := numMaxCl div globalMaxCliqueSize;
-      h := 0;
-      while (h < j) do
+      i := 0;
+      while (i < j) do
       begin
-        l := h * globalMaxCliqueSize + 1;
-        while (l <= globalMaxCliqueSize * h + globalMaxCliqueSize) do
+        l := i * globalMaxCliqueSize + 1;
+        while (l <= globalMaxCliqueSize * i + globalMaxCliqueSize) do
         begin
           write(maxCl[l]);
           Inc(l);
         end;
         writeln;
-        Inc(h);
+        Inc(i);
       end;
     end
     else
